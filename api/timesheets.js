@@ -65,7 +65,7 @@ timesheetsRouter.post('/', (req, res, next) => {
 
 // Updates employee timesheet
 timesheetsRouter.put('/:timesheetId', (req, res, next) => {
-  const { hours, rate, date, employeeId } = req.body.timesheet;
+  const { hours, rate, date } = req.body.timesheet;
 
   
   if (!hours || !rate || !date) {
@@ -78,7 +78,6 @@ timesheetsRouter.put('/:timesheetId', (req, res, next) => {
       $date: date,
       $employeeId: req.params.employeeId
   }
-  console.log(req.params.employeeId)
     db.run(sql, values, function (err) {
       if (err) {
         next(err)
