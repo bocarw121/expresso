@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3');
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite');
 const menusRouter = express.Router();
 
-
+const menuItemsRouter = require('./menu-items')
 
 menusRouter.param('menuId', (req, res, next, menuId) => {
   const sql = 'SELECT * FROM Menu WHERE id = $menuId';
@@ -18,8 +18,10 @@ menusRouter.param('menuId', (req, res, next, menuId) => {
     } else {
       res.sendStatus(404);
     }
-  })
-})
+  });
+});
+
+menusRouter.use('/:menuId/menu-items', menuItemsRouter);
 
 // Returns all menus
 menusRouter.get('/', (req, res, next) => {
@@ -44,9 +46,9 @@ menusRouter.get('/:menuId', (req, res, next) => {
 
 menusRouter.post('/', (req, res, next) => {
   const { title } = req.body.menu;
-  console.log(req.body.menu)
+
   if (!title) {
-    res.sendStatus(400)
+    res.sendStatus(400);
   }
   const sql = 'INSERT INTO Menu (title) VALUES ($title)';
   const value = { $title: title }
@@ -55,7 +57,6 @@ menusRouter.post('/', (req, res, next) => {
       next(err);
     } else {
       db.get(`SELECT * FROM Menu WHERE id = ${this.lastID}`, (err, menu) => {
-        console.log(this.lastID)
         res.status(201).json({ menu });
       });
     }
@@ -67,7 +68,7 @@ menusRouter.put('/:menuId', (req, res, next) => {
   const { title } = req.body.menu;
   
   if (!title) {
-    res.sendStatus(400)
+    res.sendStatus(400);
   }
 
   const sql = 'UPDATE Menu SET title = $tile WHERE id = $menuId';
