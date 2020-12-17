@@ -70,9 +70,7 @@ employeesRouter.post('/', (req, res, next) => {
     if (err) {
       next(err);
     } else {
-      console.log(this.lastID)
       db.get(`SELECT * FROM Employee WHERE Employee.id = ${this.lastID}`, (err, employee) => {
-        console.log(employee)
         res.status(201).json({ employee });
       });
     }
@@ -83,8 +81,8 @@ employeesRouter.post('/', (req, res, next) => {
 // updates employee
 employeesRouter.put('/:employeeId', (req, res, next) => {
   const { name, position, wage } = req.body.employee;
-  if (!name || !position, !wage) {
-    return res.sendStatus(404);
+  if (!name || !position || !wage) {
+    return res.sendStatus(400);
   }
   const sql = `UPDATE Employee SET name = $name, position = $position, wage = $wage`;
   const value = {

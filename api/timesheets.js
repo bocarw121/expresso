@@ -13,7 +13,8 @@ timesheetsRouter.param('timesheetId', (req, res, next, timesheetId) => {
     if (err) {
       next(err);
     } else if (timesheet) {
-      req.timesheet = timesheetId
+      req.timesheet = timesheet // existing id
+      next()
     } else {
       res.sendStatus(404);
     }
@@ -38,27 +39,57 @@ timesheetsRouter.get('/', (req, res, next) => {
 
 timesheetsRouter.post('/', (req, res, next) => {
   const { hours, rate, date } = req.body.timesheet;
-  const employeeId = req.params.employeeId;
   if (!hours || !rate || !date) {
     res.sendStatus(400);
   }
-  
-  const timesheetSql = `INSERT INTO timesheet (hours, rate, date, employee_id) VALUES ($hours, $rate, $date, $employeeId)`;
-  const timesheetValues = { $hours: hours, $rate: rate, $date: date, $employeeId: employeeId };
-  
+  console.log(req.body)
+  const timesheetSql = `INSERT INTO Timesheet (hours, rate, date, employee_id) VALUES ($hours, $rate, $date, $employeeId)`;
+  const timesheetValues = {
+    $hours: hours,
+    $rate: rate,
+    $date: date,
+    $employeeId: req.params.employeeId
+  };
   db.run(timesheetSql, timesheetValues, function (err) { // using name function as opposed to an arrow function to be able to use the this keyword 
     if (err) {
-    }
-    db.get(`SELECT * FROM Timesheet WHERE id = ${this.lastID}`, (err, timesheet) => {
-      console.log(err)
+      next(err);
+    } else {
+      db.get(`SELECT * FROM Timesheet WHERE id = ${this.lastID}`, (err, timesheet) => {
       res.status(201).json({ timesheet });
     });
-  });
+    }
     
+  });
+
 });
 
+// Updates employee timesheet
+timesheetsRouter.put('/:timesheetId', (req, res, next) => {
+  const { hours, rate, date } = req.body.timesheet;
+  const employeeId = req.params.employeeId;
+  
+  if (!hours || !rate || !date) {
+    res.sendStatus(400);
+  }
+    const sql = `UPDATE Timesheet SET hours = $hours, rate = $rate, date = $date, employee_id = $employeeId WHERE id = $employeeId`;
+    const values = {
+      $hours: hours,
+      $rate: rate,
+      $date: date,
+      $employeeId: employeeId
+    }
+    db.run(sql, values, function (err) {
+      if (err) {
+        next(err)
+      } else {
+        db.get(`SELECT * FROM Timesheet WHERE employee_id = ${req.params.timesheetId}`, (err, timesheet)  => {
+          res.status(201).json({ timesheet });
+        });
+      }
+    });
 
 
+});
 
 
 
