@@ -63,7 +63,25 @@ menusRouter.post('/', (req, res, next) => {
 
 });
 
+menusRouter.put('/:menuId', (req, res, next) => {
+  const { title } = req.body.menu;
+  
+  if (!title) {
+    res.sendStatus(400)
+  }
 
+  const sql = 'UPDATE Menu SET title = $tile WHERE id = $menuId';
+  const value = { $tile: title, $menuId: req.params.menuId };
+  db.run(sql, value, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      db.get(`SELECT * FROM Menu WHERE id = ${req.params.menuId}`, (err, menu) => {
+        res.status(200).json({ menu });
+      });
+    }
+  });
+});
 
 
 
