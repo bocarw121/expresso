@@ -65,25 +65,26 @@ timesheetsRouter.post('/', (req, res, next) => {
 
 // Updates employee timesheet
 timesheetsRouter.put('/:timesheetId', (req, res, next) => {
-  const { hours, rate, date } = req.body.timesheet;
-  const employeeId = req.params.employeeId;
+  const { hours, rate, date, employeeId } = req.body.timesheet;
+
   
   if (!hours || !rate || !date) {
     res.sendStatus(400);
   }
-    const sql = `UPDATE Timesheet SET hours = $hours, rate = $rate, date = $date, employee_id = $employeeId WHERE id = $employeeId`;
+    const sql = `UPDATE Timesheet SET hours = $hours, rate = $rate, date = $date, employee_id = $employeeId`;
     const values = {
       $hours: hours,
       $rate: rate,
       $date: date,
-      $employeeId: employeeId
-    }
+      $employeeId: req.params.employeeId
+  }
+  console.log(req.params.employeeId)
     db.run(sql, values, function (err) {
       if (err) {
         next(err)
       } else {
-        db.get(`SELECT * FROM Timesheet WHERE employee_id = ${req.params.timesheetId}`, (err, timesheet)  => {
-          res.status(201).json({ timesheet });
+        db.get(`SELECT * FROM Timesheet WHERE id = ${req.params.employeeId}`, (err, timesheet)  => {
+          res.status(200).json({ timesheet });
         });
       }
     });
@@ -91,7 +92,7 @@ timesheetsRouter.put('/:timesheetId', (req, res, next) => {
 
 });
 
-
+timesheetsRouter.delete
 
 
 
